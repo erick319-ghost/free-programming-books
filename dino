@@ -1,0 +1,90 @@
+import pygame
+import sys
+import random
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+WIDTH, HEIGHT = 800, 300
+GROUND_HEIGHT = 50
+FPS = 60
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+# Create the game window
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Dino Game")
+
+# Load images
+dino_image = pygame.image.load("dino.png")
+cactus_image = pygame.image.load("cactus.png")
+
+# Scale images
+dino_image = pygame.transform.scale(dino_image, (50, 50))
+cactus_image = pygame.transform.scale(cactus_image, (50, 50))
+
+# Game variables
+dino_x = 50
+dino_y = HEIGHT - GROUND_HEIGHT - 50
+dino_speed = 5
+jumping = False
+jump_count = 10
+
+cactus_x = WIDTH
+cactus_y = HEIGHT - GROUND_HEIGHT - 50
+cactus_speed = 5
+
+clock = pygame.time.Clock()
+
+# Game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_SPACE] and not jumping:
+        jumping = True
+
+    if jumping:
+        if jump_count >= -10:
+            neg = 1
+            if jump_count < 0:
+                neg = -1
+            dino_y -= (jump_count ** 2) * 0.5 * neg
+            jump_count -= 1
+        else:
+            jumping = False
+            jump_count = 10
+
+    cactus_x -= cactus_speed
+    if cactus_x < 0:
+        cactus_x = WIDTH
+        cactus_y = HEIGHT - GROUND_HEIGHT - 50
+
+    # Collision detection
+    dino_rect = pygame.Rect(dino_x, dino_y, 50, 50)
+    cactus_rect = pygame.Rect(cactus_x, cactus_y, 50, 50)
+
+    if dino_rect.colliderect(cactus_rect):
+        print("Game Over!")
+        pygame.quit()
+        sys.exit()
+
+    # Draw everything
+    screen.fill(WHITE)
+    screen.blit(dino_image, (dino_x, dino_y))
+    screen.blit(cactus_image, (cactus_x, cactus_y))
+
+    # Draw ground
+    pygame.draw.rect(screen, BLACK, (0, HEIGHT - GROUND_HEIGHT, WIDTH, GROUND_HEIGHT))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Cap the frame rate
+    clock.tick(FPS)
